@@ -2,145 +2,72 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>Админ-панель</title>
-  <link rel="stylesheet" href="style.css">
   <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-      background: #f2f2f2;
-    }
-    header {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    main {
-      max-width: 600px;
-      margin: auto;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-    input, textarea, button {
-      display: block;
-      width: 100%;
-      margin-bottom: 10px;
-      padding: 10px;
-      font-size: 16px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    button {
-      background-color: #28a745;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    ul li {
-      margin-bottom: 10px;
-    }
+    body { font-family: sans-serif; padding:20px; background:#f2f2f2; }
+    input, textarea { width:100%; margin:5px 0; padding:8px; }
+    button { padding:10px 20px; background:#28a745; color:#fff; border:none; cursor:pointer; }
   </style>
-  <head>
-    <meta charset="UTF-8">
-    <title>Админ-панель</title>
-    <link rel="stylesheet" href="style.css">
-    <script>
-      const password = prompt("Введите пароль для входа в админ-панель:");
-      if (password !== "said2011") {
-        alert("⛔ Неверный пароль. Возврат в магазин.");
-        window.location.href = "index.html";
-      }
-    </script>
-  </head>
 </head>
 <body>
-  <header>
-    <h1>⚙️ Админ-панель</h1>
-    <a href="index.html" style="color:white">← Назад в магазин</a>
-  </header>
+  <h1>⚙️ Добавить товар</h1>
 
-  <main class="admin-panel">
-    <h2>Добавить товар</h2>
-    <input type="text" id="name" placeholder="Название товара">
-    <input type="number" id="price" placeholder="Цена (UZS)">
-    <input type="text" id="image" placeholder="URL картинки или видео (начиная с http...)">
-    <textarea id="description" placeholder="Описание товара"></textarea>
-    <button onclick="addProduct()">Добавить</button>
+  <input type="text" id="name" placeholder="Название товара">
+  <input type="text" id="price" placeholder="Цена">
+  <textarea id="description" placeholder="Описание товара"></textarea>
+  <input type="file" id="file" accept="image/*,video/*">
+  <button id="add-btn">Добавить товар</button>
 
-    <h3>Список товаров</h3>
-    <ul id="admin-list"></ul>
-  </main>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
 
-  <script>
-    let products = JSON.parse(localStorage.getItem('products') || '[]');
-    const list = document.getElementById('admin-list');
+    const firebaseConfig = {
+      apiKey: "AIzaSyB2rH4rHMJ9C-VyZq_0bMzP3apBbnz_ItE",
+      authDomain: "my-shop-9b3ea.firebaseapp.com",
+      databaseURL: "https://my-shop-9b3ea-default-rtdb.firebaseio.com",
+      projectId: "my-shop-9b3ea",
+      storageBucket: "my-shop-9b3ea.appspot.com",
+      messagingSenderId: "1015805643116",
+      appId: "1:1015805643116:web:534b6141b79d46b5edcb49"
+    };
 
-    function renderList() {
-      list.innerHTML = '';
-      products.forEach((p, i) => {
-        const li = document.createElement('li');
-        li.innerHTML = `
-          <strong>${p.name}</strong> – ${p.price} UZS
-          <br><small>${p.description || ''}</small>
-          <button onclick="deleteProduct(${i})">Удалить</button>
-        `;
-        list.appendChild(li);
-      });
-    }
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-    function addProduct() {
-      const name = document.getElementById('name').value;
-      const price = document.getElementById('price').value;
-      const image = document.getElementById('image').value;
-      const description = document.getElementById('description').value;
+    document.getElementById('add-btn').addEventListener('click', () => {
+      const name = document.getElementById('name').value.trim();
+      const price = document.getElementById('price').value.trim();
+      const description = document.getElementById('description').value.trim();
+      const file = document.getElementById('file').files[0];
 
-      if (!name || !price || !image) return alert("Заполните все поля!");
+      if (!name || !price || !file) {
+        alert("Заполните все поля и выберите файл!");
+        return;
+      }
 
-      products.push({ name, price, image, description });
-      localStorage.setItem('products', JSON.stringify(products));
-      renderList();
-    }
-
-    function deleteProduct(index) {
-      products.splice(index, 1);
-      localStorage.setItem('products', JSON.stringify(products));
-      renderList();
-    }
-
-    renderList();
-  </script>
-
-  <!-- index.html (главная) логика отображения описания -->
-  <script>
-    if (location.pathname.endsWith('index.html')) {
-      document.addEventListener('DOMContentLoaded', function() {
-        const productList = document.getElementById('product-list');
-        if (!productList) return;
-
-        const products = JSON.parse(localStorage.getItem('products') || '[]');
-        productList.innerHTML = '';
-
-        products.forEach((product, index) => {
-          const div = document.createElement('div');
-          div.className = 'product';
-
-          const media = product.image.includes('.mp4') || product.image.startsWith('data:video')
-            ? `<video src="${product.image}" controls width="100"></video>`
-            : `<img src="${product.image}" alt="${product.name}" width="100">`;
-
-          div.innerHTML = `
-            ${media}
-            <h3>${product.name}</h3>
-            <p>${product.description || ''}</p>
-            <p><strong>${product.price} сум</strong></p>
-            <button onclick="addToCart(${index})">В корзину</button>
-          `;
-          productList.appendChild(div);
-        });
-      });
-    }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        push(ref(db, 'products'), {
+          name,
+          price,
+          description,
+          image: e.target.result
+        })
+        .then(() => {
+          alert("✅ Товар успешно добавлен!");
+          document.getElementById('name').value = '';
+          document.getElementById('price').value = '';
+          document.getElementById('description').value = '';
+          document.getElementById('file').value = '';
+        })
+        .catch(err => alert("Ошибка: " + err.message));
+      };
+      reader.readAsDataURL(file);
+    });
   </script>
 </body>
 </html>
+
 
