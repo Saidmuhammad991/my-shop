@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Админ-панель</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f2f2f2;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    main {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    input, textarea, button {
+      display: block;
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    ul li {
+      margin-bottom: 10px;
+    }
+  </style>
+  <head>
+    <meta charset="UTF-8">
+    <title>Админ-панель</title>
+    <link rel="stylesheet" href="style.css">
+    <script>
+      const password = prompt("Введите пароль для входа в админ-панель:");
+      if (password !== "said2011") {
+        alert("⛔ Неверный пароль. Возврат в магазин.");
+        window.location.href = "index.html";
+      }
+    </script>
+  </head>
+</head>
+<body>
+  <header>
+    <h1>⚙️ Админ-панель</h1>
+    <a href="index.html" style="color:white">← Назад в магазин</a>
+  </header>
+
+  <main class="admin-panel">
+    <h2>Добавить товар</h2>
+    <input type="text" id="name" placeholder="Название товара">
+    <input type="number" id="price" placeholder="Цена (UZS)">
+    <input type="text" id="image" placeholder="URL картинки или видео (начиная с http...)">
+    <textarea id="description" placeholder="Описание товара"></textarea>
+    <button onclick="addProduct()">Добавить</button>
+
+    <h3>Список товаров</h3>
+    <ul id="admin-list"></ul>
+  </main>
+
+  <script>
+    let products = JSON.parse(localStorage.getItem('products') || '[]');
+    const list = document.getElementById('admin-list');
+
+    function renderList() {
+      list.innerHTML = '';
+      products.forEach((p, i) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <strong>${p.name}</strong> – ${p.price} UZS
+          <br><small>${p.description || ''}</small>
+          <button onclick="deleteProduct(${i})">Удалить</button>
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    function addProduct() {
+      const name = document.getElementById('name').value;
+      const price = document.getElementById('price').value;
+      const image = document.getElementById('image').value;
+      const description = document.getElementById('description').value;
+
+      if (!name || !price || !image) return alert("Заполните все поля!");
+
+      products.push({ name, price, image, description });
+      localStorage.setItem('products', JSON.stringify(products));
+      renderList();
+    }
+
+    function deleteProduct(index) {
+      products.splice(index, 1);
+      localStorage.setItem('products', JSON.stringify(products));
+      renderList();
+    }
+
+    renderList();
+  </script>
+
+  <!-- index.html (главная) логика отображения описания -->
+  <script>
+    if (location.pathname.endsWith('index.html')) {
+      document.addEventListener('DOMContentLoaded', function() {
+        const productList = document.getElementById('product-list');
+        if (!productList) return;
+
+        const products = JSON.parse(localStorage.getItem('products') || '[]');
+        productList.innerHTML = '';
+
+        products.forEach((product, index) => {
+          const div = document.createElement('div');
+          div.className = 'product';
+
+          const media = product.image.includes('.mp4') || product.image.startsWith('data:video')
+            ? `<video src="${product.image}" controls width="100"></video>`
+            : `<img src="${product.image}" alt="${product.name}" width="100">`;
+
+          div.innerHTML = `
+            ${media}
+            <h3>${product.name}</h3>
+            <p>${product.description || ''}</p>
+            <p><strong>${product.price} сум</strong></p>
+            <button onclick="addToCart(${index})">В корзину</button>
+          `;
+          productList.appendChild(div);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
+

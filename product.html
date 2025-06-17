@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Товар</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f9f9f9;
+      padding: 20px;
+      margin: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    img, video {
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+    p {
+      font-size: 16px;
+      margin: 8px 0;
+    }
+    .btn {
+      display: inline-block;
+      padding: 10px 15px;
+      background: #28a745;
+      color: #fff;
+      border-radius: 5px;
+      text-decoration: none;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="product">
+    <!-- Товар будет показан здесь -->
+  </div>
+
+  <script>
+    const product = JSON.parse(localStorage.getItem('selectedProduct') || '{}');
+    const container = document.getElementById('product');
+
+    if (!product.name) {
+      container.innerHTML = "<p>Товар не найден.</p>";
+    } else {
+      const media = product.image.endsWith('.mp4') || product.image.startsWith('data:video')
+        ? `<video src="${product.image}" controls></video>`
+        : `<img src="${product.image}" alt="${product.name}">`;
+
+      container.innerHTML = `
+        ${media}
+        <h1>${product.name}</h1>
+        <p><strong>Цена:</strong> ${product.price} сум</p>
+        <p><strong>Описание:</strong> ${product.description || "Нет описания."}</p>
+        <button class="btn" onclick="addToCart()">🛒 В корзину</button>
+      `;
+    }
+
+    function addToCart() {
+      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      cart.push(product);
+      localStorage.setItem('cart', JSON.stringify(cart));
+      alert("🛒 Товар добавлен в корзину!");
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Корзина</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f2f2f2;
+      padding: 20px;
+      margin: 0;
+    }
+
+    .cart-container {
+      background: #fff;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .cart-item {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 10px;
+    }
+
+    .cart-item img, .cart-item video {
+      width: 100px;
+      height: auto;
+      border-radius: 6px;
+    }
+
+    .cart-info {
+      flex: 1;
+    }
+
+    .total {
+      font-weight: bold;
+      font-size: 18px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      margin-top: 10px;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .btn:hover {
+      background: #218838;
+    }
+
+    .btn.red {
+      background: #dc3545;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      margin-top: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 10px;
+      }
+
+      .cart-container {
+        padding: 15px;
+      }
+
+      .cart-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .cart-item img,
+      .cart-item video {
+        width: 100%;
+        max-width: 100%;
+      }
+
+      .cart-info h3 {
+        font-size: 18px;
+      }
+
+      .cart-info p {
+        font-size: 16px;
+      }
+
+      .btn {
+        width: 100%;
+        font-size: 16px;
+        padding: 12px;
+        text-align: center;
+      }
+
+      input[type="text"] {
+        width: 100%;
+        font-size: 16px;
+        padding: 10px;
+      }
+
+      .total {
+        font-size: 20px;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cart-container">
+    <h2>🛒 Ваша корзина</h2>
+    <div id="cart-list"></div>
+    <p id="total" class="total"></p>
+
+    <input type="text" id="telegram" placeholder="Ваш Telegram ник (@username)">
+    <button onclick="checkout()" class="btn">Оформить заказ</button>
+  </div>
+
+  <script>
+    const BOT1_TOKEN = '8035306198:AAHLn6EbLBg_FXvEB_jWOu6SCWK9f9jxkoQ';
+    const CHAT1_ID = '5887287583';
+
+    const BOT2_TOKEN = '7963545425:AAGUTrtjVfCrfTLD6V1LhJOsfXZgM4crouw';
+    const CHAT2_ID = '5750593973';
+
+    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+
+    function renderCart() {
+      const list = document.getElementById('cart-list');
+      const totalBlock = document.getElementById('total');
+      list.innerHTML = '';
+      let total = 0;
+
+      if (cart.length === 0) {
+        list.innerHTML = '<p>Корзина пуста</p>';
+        totalBlock.textContent = '';
+        return;
+      }
+
+      cart.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'cart-item';
+        const media = item.image.startsWith('data:video')
+          ? `<video src="${item.image}" controls></video>`
+          : `<img src="${item.image}">`;
+
+        div.innerHTML = `
+          ${media}
+          <div class="cart-info">
+            <h3>${item.name}</h3>
+            <p>${item.price} сум</p>
+            <button onclick="removeItem(${index})" class="btn red">Удалить</button>
+          </div>
+        `;
+        list.appendChild(div);
+        total += parseInt(item.price);
+      });
+
+      totalBlock.textContent = `Итого: ${total} сум`;
+    }
+
+    function removeItem(index) {
+      cart.splice(index, 1);
+      localStorage.setItem('cart', JSON.stringify(cart));
+      renderCart();
+    }
+
+    function sendToBot(token, chatId, message) {
+      return fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: message
+        })
+      });
+    }
+
+    function checkout() {
+      const username = document.getElementById('telegram').value.trim();
+      if (!username.startsWith('@')) {
+        alert('Пожалуйста, введите ваш Telegram ник, начиная с "@"');
+        return;
+      }
+
+      if (cart.length === 0) {
+        alert("Корзина пуста.");
+        return;
+      }
+
+      let message = `🛒 Новый заказ от ${username}:\n\n`;
+      cart.forEach(item => {
+        message += `📦 ${item.name} — ${item.price} сум\n`;
+      });
+
+      const total = cart.reduce((sum, item) => sum + parseInt(item.price), 0);
+      message += `\n💰 Итого: ${total} сум`;
+
+      Promise.all([
+        sendToBot(BOT1_TOKEN, CHAT1_ID, message),
+        sendToBot(BOT2_TOKEN, CHAT2_ID, message)
+      ]).then(() => {
+        alert("✅ Заказ отправлен обоим администраторам!");
+        localStorage.removeItem('cart');
+        cart = [];
+        renderCart();
+        document.getElementById('telegram').value = '';
+      }).catch(() => {
+        alert("❌ Ошибка при отправке одному из ботов.");
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', renderCart);
+  </script>
+
+</body>
+</html>

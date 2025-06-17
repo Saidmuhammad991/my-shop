@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Магазин</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f2f2f2;
+      padding: 20px;
+      margin: 0;
+    }
+    header, footer {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .product-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+    }
+    .product {
+      background: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      text-align: center;
+      cursor: pointer;
+    }
+    .product img, .product video {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+    .btn {
+      padding: 10px 15px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+    @media (max-width: 600px) {
+      body {
+        padding: 10px;
+      }
+      .product-list {
+        grid-template-columns: 1fr;
+      }
+      .product h2 {
+        font-size: 16px;
+      }
+      .product p {
+        font-size: 14px;
+      }
+      .btn {
+        padding: 8px 12px;
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🛍 Мой магазин</h1>
+    <nav>
+      <a href="cart.html" class="btn">🛒 Корзина</a>
+    </nav>
+  </header>
+
+  <main class="product-list" id="product-list">
+    <!-- Товары появятся здесь -->
+  </main>
+
+  <footer>
+    <p>© 2025 Мой магазин</p>
+  </footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+    import { getDatabase, ref as dbRef, onValue } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB2rH4rHMJ9C-VyZq_0bMzP3apBbnz_ItE",
+      authDomain: "my-shop-9b3ea.firebaseapp.com",
+      projectId: "my-shop-9b3ea",
+      storageBucket: "my-shop-9b3ea.appspot.com",
+      messagingSenderId: "1015805643116",
+      appId: "1:1015805643116:web:534b6141b79d46b5edcb49",
+      measurementId: "G-9H7GCRKK77",
+      databaseURL: "https://my-shop-9b3ea-default-rtdb.firebaseio.com"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const container = document.getElementById('product-list');
+    const productsRef = dbRef(db, 'products');
+
+    onValue(productsRef, (snapshot) => {
+      container.innerHTML = '';
+      if (!snapshot.exists()) {
+        container.innerHTML = '<p>Нет доступных товаров. Добавьте их через <a href="admin.html">админ-панель</a>.</p>';
+        return;
+      }
+
+      snapshot.forEach(child => {
+        const p = child.val();
+        const div = document.createElement('div');
+        div.className = 'product';
+
+        const media = p.image.endsWith('.mp4') || p.image.startsWith('data:video')
+          ? `<video src="${p.image}" controls></video>`
+          : `<img src="${p.image}" alt="${p.name}">`;
+
+        div.innerHTML = `
+          ${media}
+          <h2>${p.name}</h2>
+          <p>Цена: ${p.price} сум</p>
+        `;
+
+        div.addEventListener('click', () => {
+          localStorage.setItem('selectedProduct', JSON.stringify(p));
+          window.location.href = 'product.html';
+        });
+
+        container.appendChild(div);
+      });
+    });
+  </script>
+</body>
+</html>
