@@ -2,22 +2,46 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Админ-панель</title>
+  <link rel="stylesheet" href="style.css">
   <style>
-    body { font-family: sans-serif; padding:20px; background:#f2f2f2; }
-    input, textarea { width:100%; margin:5px 0; padding:8px; }
-    button { padding:10px 20px; background:#28a745; color:#fff; border:none; cursor:pointer; }
+    body {
+      font-family: sans-serif;
+      background: #f2f2f2;
+      padding: 20px;
+    }
+    input, textarea {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 10px 20px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    h1, h2 {
+      text-align: center;
+    }
   </style>
 </head>
 <body>
-  <h1>⚙️ Добавить товар</h1>
+  <h1>⚙️ Админ-панель</h1>
+  <p style="text-align:center;"><a href="index.html">← Назад в магазин</a></p>
 
+  <h2>Добавить товар</h2>
   <input type="text" id="name" placeholder="Название товара">
-  <input type="text" id="price" placeholder="Цена">
+  <input type="text" id="price" placeholder="Цена (UZS)">
+  <input type="text" id="image" placeholder="Ссылка на изображение или видео">
   <textarea id="description" placeholder="Описание товара"></textarea>
-  <input type="file" id="file" accept="image/*,video/*">
-  <button id="add-btn">Добавить товар</button>
+  <button>Добавить товар</button>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
@@ -36,38 +60,29 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    document.getElementById('add-btn').addEventListener('click', () => {
+    document.querySelector('button').addEventListener('click', () => {
       const name = document.getElementById('name').value.trim();
       const price = document.getElementById('price').value.trim();
+      const image = document.getElementById('image').value.trim();
       const description = document.getElementById('description').value.trim();
-      const file = document.getElementById('file').files[0];
 
-      if (!name || !price || !file) {
-        alert("Заполните все поля и выберите файл!");
+      if (!name || !price || !image) {
+        alert("❗ Заполните все поля");
         return;
       }
 
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        push(ref(db, 'products'), {
-          name,
-          price,
-          description,
-          image: e.target.result
-        })
+      const product = { name, price, image, description };
+
+      push(ref(db, 'products'), product)
         .then(() => {
-          alert("✅ Товар успешно добавлен!");
+          alert("✅ Товар добавлен!");
           document.getElementById('name').value = '';
           document.getElementById('price').value = '';
+          document.getElementById('image').value = '';
           document.getElementById('description').value = '';
-          document.getElementById('file').value = '';
         })
-        .catch(err => alert("Ошибка: " + err.message));
-      };
-      reader.readAsDataURL(file);
+        .catch(error => alert("Ошибка: " + error.message));
     });
   </script>
 </body>
 </html>
-
-
