@@ -103,7 +103,7 @@
     onValue(productsRef, (snapshot) => {
       container.innerHTML = '';
       if (!snapshot.exists()) {
-        container.innerHTML = '<p>Нет доступных товаров.</p>';
+        return;
         return;
       }
 
@@ -134,5 +134,8 @@
       });
     });
   </script>
+<footer style="text-align:center; margin-top:30px;">
+  <p>📲 Telegram: <a href="https://t.me/Iroda1986" target="_blank">@Iroda1986</a> | Канал: <a href="https://t.me/yourchannel" target="_blank">@yourchannel</a></p>
+</footer>
 </body>
 </html>
