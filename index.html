@@ -73,10 +73,7 @@
     </nav>
   </header>
 
-  $1
-<div style="text-align:center; margin-top:20px;">
-  <a href="index.html" class="btn">← Вернуться в магазин</a>
-</div>
+  
 
   
 
@@ -102,11 +99,10 @@
     const productsRef = dbRef(db, 'products');
 
     onValue(productsRef, (snapshot) => {
-      container.innerHTML = '';
-      if (!snapshot.exists()) {
-        return;
-        return;
-      }
+      container.innerHTML = '';$1if (!snapshot.exists()) {
+  container.innerHTML = '<p style="text-align:center">Товары пока не добавлены</p>';
+  return;
+}
 
       snapshot.forEach(child => {
         const p = child.val();
