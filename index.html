@@ -122,11 +122,14 @@
           ${media}
           <h2>${p.name}</h2>
           <p>Цена: ${p.price} сум</p>
+          <button class="btn">Купить</button>
         `;
 
-        div.addEventListener('click', () => {
-          localStorage.setItem('selectedProduct', JSON.stringify(p));
-          window.location.href = 'product.html';
+        div.querySelector('button').addEventListener('click', () => {
+          const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+          cart.push(p);
+          localStorage.setItem('cart', JSON.stringify(cart));
+          alert("🛒 Товар добавлен в корзину!");
         });
 
         container.appendChild(div);
@@ -135,3 +138,4 @@
   </script>
 </body>
 </html>
+
