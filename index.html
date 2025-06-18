@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Магазин</title>
+  <title>Tr-kr onlines shop</title>
   <link rel="stylesheet" href="style.css">
   <style>
     body {
@@ -67,15 +67,24 @@
 </head>
 <body>
   <header>
-    <h1>🛍 Tr-Kr online shop</h1>
+    <h1>🛍 Мой магазин</h1>
     <nav>
       <a href="cart.html" class="btn">🛒 Корзина</a>
     </nav>
   </header>
 
-  
+  <main class="product-list" id="product-list">
+    <!-- Товары появятся здесь -->
+  </main>
 
-  
+<footer style="text-align:center; margin-top:30px;">
+    <a href="https://t.me/Iroda1986" target="_blank">
+      <img src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png" alt="Telegram" width="30" style="margin: 0 10px;">
+    </a>
+    <a href="https://t.me/+aaWaY233sutjYjky" target="_blank">
+      <img src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png" alt="Telegram Channel" width="30" style="margin: 0 10px;">
+    </a>
+  </footer>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
@@ -99,10 +108,11 @@
     const productsRef = dbRef(db, 'products');
 
     onValue(productsRef, (snapshot) => {
-      container.innerHTML = '';$1if (!snapshot.exists()) {
-  container.innerHTML = '<p style="text-align:center">Товары пока не добавлены</p>';
-  return;
-}
+      container.innerHTML = '';
+      if (!snapshot.exists()) {
+        container.innerHTML = '<p>Нет доступных товаров. Добавьте их через <a href="admin.html">админ-панель</a>.</p>';
+        return;
+      }
 
       snapshot.forEach(child => {
         const p = child.val();
@@ -117,27 +127,16 @@
           ${media}
           <h2>${p.name}</h2>
           <p>Цена: ${p.price} сум</p>
-          <button class="btn">Купить</button>
         `;
 
         div.addEventListener('click', () => {
-  localStorage.setItem('selectedProduct', JSON.stringify(p));
-  window.location.href = 'product.html';
-});
+          localStorage.setItem('selectedProduct', JSON.stringify(p));
+          window.location.href = 'product.html';
+        });
 
         container.appendChild(div);
       });
     });
   </script>
-<footer style="text-align:center; margin-top:30px;">
-  <a href="https://t.me/Iroda1986" target="_blank">
-    <img src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png" alt="Telegram" width="30" style="margin: 0 10px;">
-  </a>
-  <a href="https://t.me/+aaWaY233sutjYjky" target="_blank">
-    <img src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png" alt="Telegram Channel" width="30" style="margin: 0 10px;">
-  </a>
-$1
-<div style="text-align:center; margin-top:20px;">
-</div>
 </body>
 </html>
