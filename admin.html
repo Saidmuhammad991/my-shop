@@ -30,6 +30,25 @@
     h1, h2 {
       text-align: center;
     }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      background: white;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    .delete {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      float: right;
+    }
   </style>
 </head>
 <body>
@@ -41,11 +60,14 @@
   <input type="text" id="price" placeholder="Цена (UZS)">
   <input type="text" id="image" placeholder="Ссылка на изображение или видео">
   <textarea id="description" placeholder="Описание товара"></textarea>
-  <button>Добавить товар</button>
+  <button id="add-btn">Добавить товар</button>
+
+  <h2>📋 Текущие товары</h2>
+  <ul id="product-list"></ul>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+    import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyB2rH4rHMJ9C-VyZq_0bMzP3apBbnz_ItE",
@@ -60,7 +82,9 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    document.querySelector('button').addEventListener('click', () => {
+    const productList = document.getElementById('product-list');
+
+    document.getElementById('add-btn').addEventListener('click', () => {
       const name = document.getElementById('name').value.trim();
       const price = document.getElementById('price').value.trim();
       const image = document.getElementById('image').value.trim();
@@ -83,6 +107,30 @@
         })
         .catch(error => alert("Ошибка: " + error.message));
     });
+
+    // ======== Показать список товаров ========
+    const productsRef = ref(db, 'products');
+    onValue(productsRef, snapshot => {
+      productList.innerHTML = '';
+      snapshot.forEach(child => {
+        const data = child.val();
+        const key = child.key;
+
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <strong>${data.name}</strong> — ${data.price} сум
+          <button class="delete" onclick="deleteProduct('${key}')">Удалить</button>
+        `;
+        productList.appendChild(li);
+      });
+    });
+
+    // ======== Удаление товара ========
+    window.deleteProduct = function (id) {
+      if (confirm('Удалить этот товар?')) {
+        remove(ref(db, 'products/' + id));
+      }
+    };
   </script>
 </body>
 </html>
