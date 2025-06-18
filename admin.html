@@ -52,6 +52,20 @@
   </style>
 </head>
 <body>
+  <script>
+    const correctPassword = "said2011said";
+    const entered = localStorage.getItem("adminAccess");
+    if (entered !== correctPassword) {
+      const input = prompt("Введите пароль для входа в админку:");
+      if (input !== correctPassword) {
+        alert("Неверный пароль!");
+        window.location.href = "index.html";
+      } else {
+        localStorage.setItem("adminAccess", correctPassword);
+      }
+    }
+  </script>
+
   <h1>⚙️ Админ-панель</h1>
   <p style="text-align:center;"><a href="index.html">← Назад в магазин</a></p>
 
@@ -108,7 +122,6 @@
         .catch(error => alert("Ошибка: " + error.message));
     });
 
-    // ======== Показать список товаров ========
     const productsRef = ref(db, 'products');
     onValue(productsRef, snapshot => {
       productList.innerHTML = '';
@@ -125,7 +138,6 @@
       });
     });
 
-    // ======== Удаление товара ========
     window.deleteProduct = function (id) {
       if (confirm('Удалить этот товар?')) {
         remove(ref(db, 'products/' + id));
