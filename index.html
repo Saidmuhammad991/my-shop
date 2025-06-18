@@ -73,9 +73,10 @@
     </nav>
   </header>
 
-  <main class="product-list" id="product-list">
-    <!-- Товары появятся здесь -->
-  </main>
+  $1
+<div style="text-align:center; margin-top:20px;">
+  <a href="index.html" class="btn">← Вернуться в магазин</a>
+</div>
 
   
 
@@ -123,12 +124,10 @@
           <button class="btn">Купить</button>
         `;
 
-        div.querySelector('button').addEventListener('click', () => {
-          const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-          cart.push(p);
-          localStorage.setItem('cart', JSON.stringify(cart));
-          alert("🛒 Товар добавлен в корзину!");
-        });
+        div.addEventListener('click', () => {
+  localStorage.setItem('selectedProduct', JSON.stringify(p));
+  window.location.href = 'product.html';
+});
 
         container.appendChild(div);
       });
@@ -141,6 +140,9 @@
   <a href="https://t.me/+aaWaY233sutjYjky" target="_blank">
     <img src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png" alt="Telegram Channel" width="30" style="margin: 0 10px;">
   </a>
-</footer>
+$1
+<div style="text-align:center; margin-top:20px;">
+  <a href="index.html" class="btn">← Вернуться в магазин</a>
+</div>
 </body>
 </html>
